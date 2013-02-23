@@ -29,7 +29,7 @@ In the project root run:
 Using
 -----
 
-===Layout===
+### Layout
 
 Start by defining a root template which contains placeholders for all
 referenced sub-templates.  In the example, one file is used to hold all these
@@ -75,7 +75,7 @@ Here's another body override which renders a list of posts:
     {{end}}
     {{end}}
 
-===Rendering===
+### Rendering
 
 To render templates call `tmpl.NewTemplates` and then parse the root template
 structure.  Since the example organized the root template into a directory,
@@ -193,7 +193,7 @@ This produces:
       <body>Hello World</body>
     </html>
 
-===Functions===
+### Functions
 
 Some template functions are provided:
 
