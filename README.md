@@ -29,6 +29,8 @@ In the project root run:
 Using
 -----
 
+===Layout===
+
 Start by defining a root template which contains placeholders for all
 referenced sub-templates.  In the example, one file is used to hold all these
 but they could easily be split out into multiple files.
@@ -72,6 +74,8 @@ Here's another body override which renders a list of posts:
     </div>
     {{end}}
     {{end}}
+
+===Rendering===
 
 To render templates call `tmpl.NewTemplates` and then parse the root template
 structure.  Since the example organized the root template into a directory,
@@ -188,3 +192,23 @@ This produces:
       <head><title>Hello World</title></head>
       <body>Hello World</body>
     </html>
+
+===Functions===
+
+Some template functions are provided:
+
+**timeformat**
+This function takes a `time.Time` value as its first argument and renders
+it according to a format string supplied as its second argument.  If a string
+is passed which matches a predefined format defined in the `time` package, that
+format is used, otherwise it is treated as a literal format string:
+
+    {{timeformat .Date "UnixDate"}}
+    {{timeformat .Date "Mon Jan 02 15:04:05 -0700 2006"}}
+
+**textcontent**
+This performs rudmentary stripping of HTML tags so that only text content
+is output.  IMPORTANT! Do not use this method as a security measure - proper
+sanitization should be performed on untrusted input.
+
+    {{textcontent .Body}}
