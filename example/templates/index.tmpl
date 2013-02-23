@@ -1,0 +1,9 @@
+{{define "body"}}
+{{range .Posts}}
+<div>
+  <h2>{{.Title}}</h2>
+  <p>{{timeformat .Date "UnixDate"}}</p>
+  <p>{{textcontent .Body}}</p>
+</div>
+{{end}}
+{{end}}
