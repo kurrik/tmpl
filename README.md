@@ -126,24 +126,24 @@ This produces:
 
     Index
     =============================
-    &lt;html&gt;
-      &lt;head&gt;&lt;title&gt;My Site&lt;/title&gt;&lt;/head&gt;
-      &lt;body&gt;
+    <html>
+      <head><title>My Site</title></head>
+      <body>
 
-    &lt;div&gt;
-      &lt;h2&gt;Hello World&lt;/h2&gt;
-      &lt;p&gt;Tue Nov 10 23:00:00 UTC 2009&lt;/p&gt;
-      &lt;p&gt;Hi!&lt;/p&gt;
-    &lt;/div&gt;
+    <div>
+      <h2>Hello World</h2>
+      <p>Tue Nov 10 23:00:00 UTC 2009</p>
+      <p>Hi!</p>
+    </div>
 
-    &lt;div&gt;
-      &lt;h2&gt;Hello Again&lt;/h2&gt;
-      &lt;p&gt;Wed Nov 11 00:00:00 UTC 2009&lt;/p&gt;
-      &lt;p&gt;Hi there!&lt;/p&gt;
-    &lt;/div&gt;
+    <div>
+      <h2>Hello Again</h2>
+      <p>Wed Nov 11 00:00:00 UTC 2009</p>
+      <p>Hi there!</p>
+    </div>
 
-    &lt;/body&gt;
-    &lt;/html&gt;
+    </body>
+    </html>
 
 Here is the call to render the first post:
 
@@ -159,16 +159,16 @@ This produces:
 
     Post
     =============================
-    &lt;html&gt;
-      &lt;head&gt;&lt;title&gt;Hello World&lt;/title&gt;&lt;/head&gt;
-      &lt;body&gt;
-    &lt;div&gt;
-      &lt;h2&gt;Hello World&lt;/h2&gt;
-      &lt;p&gt;Tue Nov 10 23:00:00 UTC 2009&lt;/p&gt;
-      &lt;p&gt;&lt;em&gt;Hi!&lt;/em&gt;&lt;/p&gt;
-    &lt;/div&gt;
-    &lt;/body&gt;
-    &lt;/html&gt;
+    <html>
+      <head><title>Hello World</title></head>
+      <body>
+    <div>
+      <h2>Hello World</h2>
+      <p>Tue Nov 10 23:00:00 UTC 2009</p>
+      <p><em>Hi!</em></p>
+    </div>
+    </body>
+    </html>
 
 You may also render a template string with the `RenderText` method:
 
@@ -184,7 +184,7 @@ This produces:
 
     Ad-hoc
     =============================
-    &lt;html&gt;
-      &lt;head&gt;&lt;title&gt;Hello World&lt;/title&gt;&lt;/head&gt;
-      &lt;body&gt;Hello World&lt;/body&gt;
-    &lt;/html&gt;
+    <html>
+      <head><title>Hello World</title></head>
+      <body>Hello World</body>
+    </html>
