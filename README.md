@@ -1,7 +1,7 @@
 tmpl
 ====
 This library offers a better approach toward the management of Go's built-in
-template libraries.
+templates.
 
 The goal is to be able to configure a set of root templates, presumably for
 a website, and then be able to render overrides as needed.
