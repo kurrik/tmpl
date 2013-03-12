@@ -145,9 +145,23 @@ func (ts *Templates) mergeTemplate(t *template.Template) (out *template.Template
 	for _, tmpl := range t.Templates() {
 		ptr := out.Lookup(tmpl.Name())
 		if ptr == nil {
-			ptr = out.New(tmpl.Name())
+			out.Parse(fmt.Sprintf(`{{define "%v"}}{{end}}`, tmpl.Name()))
+			ptr = out.Lookup(tmpl.Name())
 		}
-		(*ptr) = *tmpl
+		var clone *template.Template
+		if clone, err = tmpl.Clone(); err != nil {
+			return
+		}
+		(*ptr) = *clone
+		// Merge existing root templates back into new template.
+		for _, out_tmpl := range out.Templates() {
+			ptr2 := clone.Lookup(out_tmpl.Name())
+			if ptr2 == nil {
+				clone.Parse(fmt.Sprintf(`{{define "%v"}}{{end}}`, out_tmpl.Name()))
+				ptr2 = clone.Lookup(out_tmpl.Name())
+				(*ptr2) = *out_tmpl
+			}
+		}
 	}
 	return
 }

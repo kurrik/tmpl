@@ -36,9 +36,10 @@ const (
 	TMPL_BASE = `[h]{{template "head" .}}[/h][b]{{template "body" .}}[/b]`
 	TMPL_HEAD = `{{define "head"}}[c]{{.HeadContent}}[/c]{{end}}`
 	TMPL_BODY = `{{define "body"}}[c]{{.BodyContent}}[/c]{{end}}`
-	TMPL_WRAP = `{{define "wrap}}[w]{{template "wrap_content" .}}[/w]{{end}}` +
+	TMPL_WRAP = `{{define "wrap"}}[w]{{template "wrap_content" .}}[/w]{{end}}` +
 	            `{{define "wrap_content"}}{{end}}`
 	TMPL_CONT = `{{define "body"}}{{template "wrap" .}}{{end}}` +
+	            //`{{define "wrap"}}[wb]{{.BodyContent}}[/wb]{{end}}` +
 	            `{{define "wrap_content"}}[c]{{.BodyContent}}[/c]{{end}}`
 )
 
