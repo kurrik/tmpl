@@ -15,10 +15,10 @@
 package tmpl
 
 import (
-	"io"
 	"bytes"
 	"fmt"
 	"github.com/kurrik/fauxfile"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -28,18 +28,20 @@ import (
 )
 
 type Templates struct {
-	fs   fauxfile.Filesystem
-	log  *log.Logger
-	root *template.Template
-	fmap *template.FuncMap
+	fs    fauxfile.Filesystem
+	log   *log.Logger
+	root  *template.Template
+	fmap  *template.FuncMap
+	empty bool
 }
 
 func NewTemplates() *Templates {
 	return &Templates{
-		fs:   &fauxfile.RealFilesystem{},
-		log:  log.New(os.Stderr, "", log.LstdFlags),
-		root: template.New("root"),
-		fmap: getFuncMap(),
+		fs:    &fauxfile.RealFilesystem{},
+		log:   log.New(os.Stderr, "", log.LstdFlags),
+		root:  template.New("root"),
+		fmap:  getFuncMap(),
+		empty: true,
 	}
 }
 
@@ -78,6 +80,16 @@ func (ts *Templates) AddTemplateFromFile(path string) (err error) {
 // Includes the contents of the supplied text in the root template.
 func (ts *Templates) AddTemplate(text string) (err error) {
 	_, err = ts.root.Funcs(*ts.fmap).Parse(text)
+	ts.empty = false;
+	return
+}
+
+// Includes the contents of the supplied parsed template in the root template.
+func (ts *Templates) AddTemplateFromTemplate(tmpl *template.Template) (err error) {
+	if ts.root, err = ts.mergeTemplate(tmpl); err != nil {
+		return
+	}
+	ts.root.Funcs(*ts.fmap)
 	return
 }
 
@@ -101,6 +113,23 @@ func (ts *Templates) RenderText(text string, data map[string]interface{}) (out s
 	if tmpl, err = template.New("temp").Funcs(*ts.fmap).Parse(text); err != nil {
 		return
 	}
+	if clone, err = ts.mergeTemplate(tmpl); err != nil {
+		return
+	}
+	writer = bytes.NewBufferString("")
+	if err = clone.Execute(writer, data); err == nil {
+		out = writer.String()
+	}
+	return
+}
+
+// Renders an existing parsed template.Template instance.
+func (ts *Templates) RenderTemplate(tmpl *template.Template, data map[string]interface{}) (out string, err error) {
+	var (
+		clone  *template.Template
+		writer *bytes.Buffer
+	)
+	tmpl.Funcs(*ts.fmap)
 	if clone, err = ts.mergeTemplate(tmpl); err != nil {
 		return
 	}
@@ -139,8 +168,12 @@ func (ts *Templates) mergeTemplate(t *template.Template) (out *template.Template
 			err = fmt.Errorf("Problem cloning template: %v", r)
 		}
 	}()
-	if out, err = ts.root.Clone(); err != nil {
-		return
+	if ts.empty {
+		out = template.New("root")
+	} else {
+		if out, err = ts.root.Clone(); err != nil {
+			return
+		}
 	}
 	for _, tmpl := range t.Templates() {
 		ptr := out.Lookup(tmpl.Name())

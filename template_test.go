@@ -18,6 +18,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"text/template"
 )
 
 func LooseCompare(t *testing.T, a string, b string) bool {
@@ -114,6 +115,30 @@ func TestRenderText(t *testing.T) {
 	}
 }
 
+func TestRenderTemplate(t *testing.T) {
+	var (
+		out  string
+		err  error
+		tmpl *template.Template
+		data = map[string]interface{}{
+			"HeadContent": "hc",
+			"BodyContent": "bc",
+		}
+	)
+	tmpl, _ = template.New("body").Parse(`[BC]{{.BodyContent}}[/BC]`)
+	templates := NewTemplates()
+	templates.AddTemplate(TMPL_BASE)
+	templates.AddTemplate(TMPL_HEAD)
+	templates.AddTemplate(TMPL_BODY)
+
+	if out, err = templates.RenderTemplate(tmpl, data); err != nil {
+		t.Fatalf("Error rendering: %v", err)
+	}
+	if !LooseCompare(t, out, "[h][c]hc[/c][/h][b][BC]bc[/BC][/b]") {
+		t.Fatalf("RenderTemplate did not produce correct output")
+	}
+}
+
 func TestOutOfOrderTemplateInitialization(t *testing.T) {
 	var (
 		out  string
@@ -133,6 +158,60 @@ func TestOutOfOrderTemplateInitialization(t *testing.T) {
 		t.Fatalf("Error rendering: %v", err)
 	}
 	if !LooseCompare(t, out, "[h][c]hc[/c][/h][b][c]bc[/c][/b]") {
+		t.Fatalf("Out of order init did not produce correct output")
+	}
+}
+
+func TestAddTemplateFromTemplate(t *testing.T) {
+	var (
+		out  string
+		err  error
+		tmpl *template.Template
+		data = map[string]interface{}{
+			"HeadContent": "hc",
+			"BodyContent": "bc",
+		}
+	)
+
+	templates := NewTemplates()
+	templates.AddTemplate(TMPL_BASE)
+	templates.AddTemplate(TMPL_HEAD)
+	tmpl, _ = template.New("body").Parse(`[BC]{{.BodyContent}}[/BC]`)
+	if err = templates.AddTemplateFromTemplate(tmpl); err != nil {
+		t.Fatalf("Error adding template: %v", err)
+	}
+
+	if out, err = templates.Render(data); err != nil {
+		t.Fatalf("Error rendering: %v", err)
+	}
+	if !LooseCompare(t, out, "[h][c]hc[/c][/h][b][BC]bc[/BC][/b]") {
+		t.Fatalf("Out of order init did not produce correct output")
+	}
+}
+
+func TestOutOfOrderAddTemplateFromTemplate(t *testing.T) {
+	var (
+		out  string
+		err  error
+		tmpl *template.Template
+		data = map[string]interface{}{
+			"HeadContent": "hc",
+			"BodyContent": "bc",
+		}
+	)
+
+	templates := NewTemplates()
+	tmpl, _ = template.New("body").Parse(`[BC]{{.BodyContent}}[/BC]`)
+	if err = templates.AddTemplateFromTemplate(tmpl); err != nil {
+		t.Fatalf("Error adding template: %v", err)
+	}
+	templates.AddTemplate(TMPL_BASE)
+	templates.AddTemplate(TMPL_HEAD)
+
+	if out, err = templates.Render(data); err != nil {
+		t.Fatalf("Error rendering: %v", err)
+	}
+	if !LooseCompare(t, out, "[h][c]hc[/c][/h][b][BC]bc[/BC][/b]") {
 		t.Fatalf("Out of order init did not produce correct output")
 	}
 }
