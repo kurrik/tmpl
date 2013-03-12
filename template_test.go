@@ -36,6 +36,10 @@ const (
 	TMPL_BASE = `[h]{{template "head" .}}[/h][b]{{template "body" .}}[/b]`
 	TMPL_HEAD = `{{define "head"}}[c]{{.HeadContent}}[/c]{{end}}`
 	TMPL_BODY = `{{define "body"}}[c]{{.BodyContent}}[/c]{{end}}`
+	TMPL_WRAP = `{{define "wrap}}[w]{{template "wrap_content" .}}[/w]{{end}}` +
+	            `{{define "wrap_content"}}{{end}}`
+	TMPL_CONT = `{{define "body"}}{{template "wrap" .}}{{end}}` +
+	            `{{define "wrap_content"}}[c]{{.BodyContent}}[/c]{{end}}`
 )
 
 func TestRender(t *testing.T) {
@@ -58,6 +62,30 @@ func TestRender(t *testing.T) {
 	}
 	if !LooseCompare(t, out, "[h][c]hc[/c][/h][b][c]bc[/c][/b]") {
 		t.Fatalf("Simple render did not produce correct output")
+	}
+}
+
+func TestWrappedContent(t *testing.T) {
+	var (
+		out  string
+		err  error
+		data = map[string]interface{}{
+			"HeadContent": "hc",
+			"BodyContent": "bc",
+		}
+	)
+
+	templates := NewTemplates()
+	templates.AddTemplate(TMPL_BASE)
+	templates.AddTemplate(TMPL_HEAD)
+	templates.AddTemplate(TMPL_BODY)
+	templates.AddTemplate(TMPL_WRAP)
+
+	if out, err = templates.RenderText(TMPL_CONT, data); err != nil {
+		t.Fatalf("Error rendering: %v", err)
+	}
+	if !LooseCompare(t, out, "[h][c]hc[/c][/h][b][w][c]bc[/c][/w][/b]") {
+		t.Fatalf("Rendering wrapped text did not produce correct output")
 	}
 }
 
