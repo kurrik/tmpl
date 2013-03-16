@@ -17,8 +17,8 @@ package tmpl
 import (
 	"strings"
 	"testing"
-	"time"
 	"text/template"
+	"time"
 )
 
 func LooseCompare(t *testing.T, a string, b string) bool {
@@ -38,10 +38,10 @@ const (
 	TMPL_HEAD = `{{define "head"}}[c]{{.HeadContent}}[/c]{{end}}`
 	TMPL_BODY = `{{define "body"}}[c]{{.BodyContent}}[/c]{{end}}`
 	TMPL_WRAP = `{{define "wrap"}}[w]{{template "wrap_content" .}}[/w]{{end}}` +
-	            `{{define "wrap_content"}}{{end}}`
+		`{{define "wrap_content"}}{{end}}`
 	TMPL_CONT = `{{define "body"}}{{template "wrap" .}}{{end}}` +
-	            //`{{define "wrap"}}[wb]{{.BodyContent}}[/wb]{{end}}` +
-	            `{{define "wrap_content"}}[c]{{.BodyContent}}[/c]{{end}}`
+		//`{{define "wrap"}}[wb]{{.BodyContent}}[/wb]{{end}}` +
+		`{{define "wrap_content"}}[c]{{.BodyContent}}[/c]{{end}}`
 )
 
 func TestRender(t *testing.T) {
@@ -263,6 +263,3 @@ func TestTimeformatFunction(t *testing.T) {
 		t.Fatalf("Timeformat function did not produce correct output")
 	}
 }
-
-
-

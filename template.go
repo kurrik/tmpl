@@ -80,7 +80,7 @@ func (ts *Templates) AddTemplateFromFile(path string) (err error) {
 // Includes the contents of the supplied text in the root template.
 func (ts *Templates) AddTemplate(text string) (err error) {
 	_, err = ts.root.Funcs(*ts.fmap).Parse(text)
-	ts.empty = false;
+	ts.empty = false
 	return
 }
 
