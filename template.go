@@ -45,6 +45,11 @@ func NewTemplates() *Templates {
 	}
 }
 
+// Allows overriding of the filesystem for unit tests.
+func (ts *Templates) SetFilesystem(fs fauxfile.Filesystem) {
+	ts.fs = fs
+}
+
 // Includes the contents of the supplied directory in the root template.
 func (ts *Templates) AddTemplatesFromDir(path string) (err error) {
 	var (
