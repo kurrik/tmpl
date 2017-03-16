@@ -110,6 +110,11 @@ func (ts *Templates) RenderFile(path string, data map[string]interface{}) (out s
 
 // Overrides portions of the root template and renders the appropriate data.
 func (ts *Templates) RenderText(text string, data map[string]interface{}) (out string, err error) {
+	return ts.NamedRenderText("root", text, data)
+}
+
+// Overrides portions of the root template and renders the appropriate data into the named template.
+func (ts *Templates) NamedRenderText(name string, text string, data map[string]interface{}) (out string, err error) {
 	var (
 		clone  *template.Template
 		tmpl   *template.Template
@@ -122,6 +127,10 @@ func (ts *Templates) RenderText(text string, data map[string]interface{}) (out s
 		return
 	}
 	writer = bytes.NewBufferString("")
+	if clone = clone.Lookup(name); clone == nil {
+		err = fmt.Errorf("No template with name %v", name)
+		return
+	}
 	if err = clone.Execute(writer, data); err == nil {
 		out = writer.String()
 	}
@@ -130,6 +139,11 @@ func (ts *Templates) RenderText(text string, data map[string]interface{}) (out s
 
 // Renders an existing parsed template.Template instance.
 func (ts *Templates) RenderTemplate(tmpl *template.Template, data map[string]interface{}) (out string, err error) {
+	return ts.NamedRenderTemplate("root", tmpl, data)
+}
+
+// Renders an existing parsed template.Template instance into the named template.
+func (ts *Templates) NamedRenderTemplate(name string, tmpl *template.Template, data map[string]interface{}) (out string, err error) {
 	var (
 		clone  *template.Template
 		writer *bytes.Buffer
@@ -139,6 +153,10 @@ func (ts *Templates) RenderTemplate(tmpl *template.Template, data map[string]int
 		return
 	}
 	writer = bytes.NewBufferString("")
+	if clone = clone.Lookup(name); clone == nil {
+		err = fmt.Errorf("No template with name %v", name)
+		return
+	}
 	if err = clone.Execute(writer, data); err == nil {
 		out = writer.String()
 	}
@@ -147,8 +165,20 @@ func (ts *Templates) RenderTemplate(tmpl *template.Template, data map[string]int
 
 // Renders the root template without any overrides.
 func (ts *Templates) Render(data map[string]interface{}) (out string, err error) {
-	writer := bytes.NewBufferString("")
-	if err = ts.root.Execute(writer, data); err == nil {
+	return ts.NamedRender("root", data)
+}
+
+// Renders the root template without any overrides into the named template.
+func (ts *Templates) NamedRender(name string, data map[string]interface{}) (out string, err error) {
+	var (
+		namedTemplate *template.Template
+		writer        = bytes.NewBufferString("")
+	)
+	if namedTemplate = ts.root.Lookup(name); namedTemplate == nil {
+		err = fmt.Errorf("No template with name %v", name)
+		return
+	}
+	if err = namedTemplate.Execute(writer, data); err == nil {
 		out = writer.String()
 	}
 	return

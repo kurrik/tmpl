@@ -23,8 +23,10 @@ import (
 
 func LooseCompare(t *testing.T, a string, b string) bool {
 	a = strings.Replace(a, " ", "", -1)
+	a = strings.Replace(a, "\t", "", -1)
 	a = strings.Replace(a, "\n", "", -1)
 	b = strings.Replace(b, " ", "", -1)
+	b = strings.Replace(b, "\t", "", -1)
 	b = strings.Replace(b, "\n", "", -1)
 	if a != b {
 		t.Logf("LooseCompare diff:\n%v\n%v", a, b)
@@ -34,14 +36,32 @@ func LooseCompare(t *testing.T, a string, b string) bool {
 }
 
 const (
-	TMPL_BASE = `[h]{{template "head" .}}[/h][b]{{template "body" .}}[/b]`
-	TMPL_HEAD = `{{define "head"}}[c]{{.HeadContent}}[/c]{{end}}`
-	TMPL_BODY = `{{define "body"}}[c]{{.BodyContent}}[/c]{{end}}`
-	TMPL_WRAP = `{{define "wrap"}}[w]{{template "wrap_content" .}}[/w]{{end}}` +
-		`{{define "wrap_content"}}{{end}}`
-	TMPL_CONT = `{{define "body"}}{{template "wrap" .}}{{end}}` +
-		//`{{define "wrap"}}[wb]{{.BodyContent}}[/wb]{{end}}` +
-		`{{define "wrap_content"}}[c]{{.BodyContent}}[/c]{{end}}`
+	TMPL_BASE = `
+		[h]{{template "head" .}}[/h]
+		[b]{{template "body" .}}[/b]
+	`
+	TMPL_HEAD = `
+		{{define "head"}}
+			[c]{{.HeadContent}}[/c]
+		{{end}}
+	`
+	TMPL_BODY = `
+		{{define "body"}}
+			[c]{{.BodyContent}}[/c]
+		{{end}}
+	`
+	TMPL_WRAP = `
+		{{define "wrap"}}
+			[w]{{template "wrap_content" .}}[/w]
+		{{end}}
+		{{define "wrap_content"}}{{end}}
+	`
+	TMPL_CONT = `
+		{{define "body"}}
+			{{template "wrap" .}}
+		{{end}}
+		{{define "wrap_content"}}[c]{{.BodyContent}}[/c]{{end}}
+	`
 )
 
 func TestRender(t *testing.T) {
@@ -213,6 +233,50 @@ func TestOutOfOrderAddTemplateFromTemplate(t *testing.T) {
 	}
 	if !LooseCompare(t, out, "[h][c]hc[/c][/h][b][BC]bc[/BC][/b]") {
 		t.Fatalf("Out of order init did not produce correct output")
+	}
+}
+
+func TestCallTemplateFromUpdatedTemplate(t *testing.T) {
+	var (
+		out  string
+		err  error
+		data = map[string]interface{}{}
+	)
+	templates := NewTemplates()
+	templates.AddTemplate(`{{define "root"}}[r]{{template "body" .}}[r]{{end}}`)
+	templates.AddTemplate(`{{define "body"}}{{end}}`)
+	templates.AddTemplate(`{{define "helper"}}Helper{{end}}`)
+	// Update body and call a loaded template from it.
+	if err = templates.AddTemplate(`{{define "body"}}{{template "helper" .}}{{end}}`); err != nil {
+		t.Fatalf("Could not update template: %v", err)
+	}
+	if out, err = templates.Render(data); err != nil {
+		t.Fatalf("Error rendering: %v", err)
+	}
+	if !LooseCompare(t, out, "[r]Helper[r]") {
+		t.Fatalf("Template call from updated template did not produce correct output")
+	}
+}
+
+func TestNamedRenderTemplate(t *testing.T) {
+	var (
+		out  string
+		err  error
+		data = map[string]interface{}{}
+	)
+	templates := NewTemplates()
+	templates.AddTemplate(`{{define "root"}}[r]{{template "body" .}}[r]{{end}}`)
+	templates.AddTemplate(`{{define "body"}}{{end}}`)
+	templates.AddTemplate(`{{define "helper"}}Helper{{end}}`)
+	// Update body and call a loaded template from it.
+	if err = templates.AddTemplate(`{{define "body"}}{{template "helper" .}}{{end}}`); err != nil {
+		t.Fatalf("Could not update template: %v", err)
+	}
+	if out, err = templates.NamedRender("body", data); err != nil {
+		t.Fatalf("Error rendering: %v", err)
+	}
+	if !LooseCompare(t, out, "Helper") {
+		t.Fatalf("Named template render call did not produce correct output")
 	}
 }
 
