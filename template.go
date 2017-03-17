@@ -186,6 +186,22 @@ func (ts *Templates) NamedRender(name string, data map[string]interface{}) (out 
 	return
 }
 
+// Produces a clone of the root template.
+func (ts *Templates) Clone() (*template.Template, error) {
+	return ts.root.Clone()
+}
+
+// Merges the current templates into another standard template instance.
+func (ts *Templates) MergeInto(tmpl *template.Template) (out *template.Template, err error) {
+	out = tmpl
+	for _, t := range ts.root.Templates() {
+		if t.Name() != TEMP_TEMPLATE_NAME {
+			out, err = out.AddParseTree(t.Name(), t.Tree)
+		}
+	}
+	return
+}
+
 // Reads directory contents from the given path and returns file names.
 func (ts *Templates) readDir(path string) (names []string, err error) {
 	var f fauxfile.File
