@@ -107,7 +107,7 @@ func TestWrappedContent(t *testing.T) {
 		t.Fatalf("Error rendering: %v", err)
 	}
 	if !LooseCompare(t, out, "[h][c]hc[/c][/h][b][w][c]bc[/c][/w][/b]") {
-		t.Fatalf("Rendering wrapped text did not produce correct output")
+		t.Fatalf("TestWrappedContent error")
 	}
 }
 
@@ -131,7 +131,7 @@ func TestRenderText(t *testing.T) {
 		t.Fatalf("Error rendering: %v", err)
 	}
 	if !LooseCompare(t, out, "[h][c]hc[/c][/h][b][BC]bc[/BC][/b]") {
-		t.Fatalf("RenderText did not produce correct output")
+		t.Fatalf("TestRenderText error")
 	}
 }
 
@@ -155,7 +155,7 @@ func TestRenderTemplate(t *testing.T) {
 		t.Fatalf("Error rendering: %v", err)
 	}
 	if !LooseCompare(t, out, "[h][c]hc[/c][/h][b][BC]bc[/BC][/b]") {
-		t.Fatalf("RenderTemplate did not produce correct output")
+		t.Fatalf("TestRenderTemplate error")
 	}
 }
 
@@ -178,7 +178,7 @@ func TestOutOfOrderTemplateInitialization(t *testing.T) {
 		t.Fatalf("Error rendering: %v", err)
 	}
 	if !LooseCompare(t, out, "[h][c]hc[/c][/h][b][c]bc[/c][/b]") {
-		t.Fatalf("Out of order init did not produce correct output")
+		t.Fatalf("TestOutOfOrderTemplateInitialization error")
 	}
 }
 
@@ -205,7 +205,7 @@ func TestAddTemplateFromTemplate(t *testing.T) {
 		t.Fatalf("Error rendering: %v", err)
 	}
 	if !LooseCompare(t, out, "[h][c]hc[/c][/h][b][BC]bc[/BC][/b]") {
-		t.Fatalf("Out of order init did not produce correct output")
+		t.Fatalf("TestAddTemplateFromTemplate error")
 	}
 }
 
@@ -232,7 +232,7 @@ func TestOutOfOrderAddTemplateFromTemplate(t *testing.T) {
 		t.Fatalf("Error rendering: %v", err)
 	}
 	if !LooseCompare(t, out, "[h][c]hc[/c][/h][b][BC]bc[/BC][/b]") {
-		t.Fatalf("Out of order init did not produce correct output")
+		t.Fatalf("TestOutOfOrderAddTemplateFromTemplate error")
 	}
 }
 
@@ -254,7 +254,7 @@ func TestCallTemplateFromUpdatedTemplate(t *testing.T) {
 		t.Fatalf("Error rendering: %v", err)
 	}
 	if !LooseCompare(t, out, "[r]Helper[r]") {
-		t.Fatalf("Template call from updated template did not produce correct output")
+		t.Fatalf("TestCallTemplateFromUpdatedTemplate error")
 	}
 }
 
@@ -276,7 +276,7 @@ func TestNamedRenderTemplate(t *testing.T) {
 		t.Fatalf("Error rendering: %v", err)
 	}
 	if !LooseCompare(t, out, "Helper") {
-		t.Fatalf("Named template render call did not produce correct output")
+		t.Fatalf("TestNamedRenderTemplate error")
 	}
 }
 
@@ -300,7 +300,7 @@ func TestTextcontentFunction(t *testing.T) {
 		t.Fatalf("Error rendering: %v", err)
 	}
 	if !LooseCompare(t, out, "[h][c]hc[/c][/h][b][TC]bc[/TC][/b]") {
-		t.Fatalf("Textcontent function did not produce correct output")
+		t.Fatalf("TestTextcontentFunction error")
 	}
 }
 
@@ -324,6 +324,6 @@ func TestTimeformatFunction(t *testing.T) {
 		t.Fatalf("Error rendering: %v", err)
 	}
 	if !LooseCompare(t, out, "[h][c]hc[/c][/h][b][TF]TueNov1023:00:00UTC2009[/TF][/b]") {
-		t.Fatalf("Timeformat function did not produce correct output")
+		t.Fatalf("TestTimeformatFunction error")
 	}
 }

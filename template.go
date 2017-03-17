@@ -27,6 +27,8 @@ import (
 	"time"
 )
 
+const TEMP_TEMPLATE_NAME = "xxx111xxx"
+
 type Templates struct {
 	fs    fauxfile.Filesystem
 	log   *log.Logger
@@ -39,7 +41,7 @@ func NewTemplates() *Templates {
 	return &Templates{
 		fs:    &fauxfile.RealFilesystem{},
 		log:   log.New(os.Stderr, "", log.LstdFlags),
-		root:  template.New("root"),
+		root:  template.Must(template.New("root").Parse("")),
 		fmap:  getFuncMap(),
 		empty: true,
 	}
@@ -84,7 +86,7 @@ func (ts *Templates) AddTemplateFromFile(path string) (err error) {
 
 // Includes the contents of the supplied text in the root template.
 func (ts *Templates) AddTemplate(text string) (err error) {
-	_, err = ts.root.Funcs(*ts.fmap).Parse(text)
+	_, err = ts.root.Lookup("root").Funcs(*ts.fmap).Parse(text)
 	ts.empty = false
 	return
 }
@@ -120,7 +122,7 @@ func (ts *Templates) NamedRenderText(name string, text string, data map[string]i
 		tmpl   *template.Template
 		writer *bytes.Buffer
 	)
-	if tmpl, err = template.New("temp").Funcs(*ts.fmap).Parse(text); err != nil {
+	if tmpl, err = template.New(TEMP_TEMPLATE_NAME).Funcs(*ts.fmap).Parse(text); err != nil {
 		return
 	}
 	if clone, err = ts.mergeTemplate(tmpl); err != nil {
@@ -128,7 +130,7 @@ func (ts *Templates) NamedRenderText(name string, text string, data map[string]i
 	}
 	writer = bytes.NewBufferString("")
 	if clone = clone.Lookup(name); clone == nil {
-		err = fmt.Errorf("No template with name %v", name)
+		err = fmt.Errorf("No template with name %v, have: %v", name, clone.DefinedTemplates())
 		return
 	}
 	if err = clone.Execute(writer, data); err == nil {
@@ -154,7 +156,7 @@ func (ts *Templates) NamedRenderTemplate(name string, tmpl *template.Template, d
 	}
 	writer = bytes.NewBufferString("")
 	if clone = clone.Lookup(name); clone == nil {
-		err = fmt.Errorf("No template with name %v", name)
+		err = fmt.Errorf("No template with name %v, have: %v", name, clone.DefinedTemplates())
 		return
 	}
 	if err = clone.Execute(writer, data); err == nil {
@@ -175,7 +177,7 @@ func (ts *Templates) NamedRender(name string, data map[string]interface{}) (out 
 		writer        = bytes.NewBufferString("")
 	)
 	if namedTemplate = ts.root.Lookup(name); namedTemplate == nil {
-		err = fmt.Errorf("No template with name %v", name)
+		err = fmt.Errorf("No template with name %v, have: %v", name, ts.root.DefinedTemplates())
 		return
 	}
 	if err = namedTemplate.Execute(writer, data); err == nil {
@@ -197,38 +199,12 @@ func (ts *Templates) readDir(path string) (names []string, err error) {
 
 // Returns a copy of the root template with the supplied template merged in.
 func (ts *Templates) mergeTemplate(t *template.Template) (out *template.Template, err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			// Seems to be a bug with cloning empty templates.
-			err = fmt.Errorf("Problem cloning template: %v", r)
-		}
-	}()
-	if ts.empty {
-		out = template.New("root")
-	} else {
-		if out, err = ts.root.Clone(); err != nil {
-			return
-		}
+	if out, err = ts.root.Clone(); err != nil {
+		return
 	}
 	for _, tmpl := range t.Templates() {
-		ptr := out.Lookup(tmpl.Name())
-		if ptr == nil {
-			out.Parse(fmt.Sprintf(`{{define "%v"}}{{end}}`, tmpl.Name()))
-			ptr = out.Lookup(tmpl.Name())
-		}
-		var clone *template.Template
-		if clone, err = tmpl.Clone(); err != nil {
-			return
-		}
-		(*ptr) = *clone
-		// Merge existing root templates back into new template.
-		for _, out_tmpl := range out.Templates() {
-			ptr2 := clone.Lookup(out_tmpl.Name())
-			if ptr2 == nil {
-				clone.Parse(fmt.Sprintf(`{{define "%v"}}{{end}}`, out_tmpl.Name()))
-				ptr2 = clone.Lookup(out_tmpl.Name())
-				(*ptr2) = *out_tmpl
-			}
+		if tmpl.Name() != TEMP_TEMPLATE_NAME {
+			out, err = out.AddParseTree(tmpl.Name(), tmpl.Tree)
 		}
 	}
 	return
