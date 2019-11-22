@@ -193,7 +193,9 @@ func (ts *Templates) Clone() (*template.Template, error) {
 
 // Merges the current templates into another standard template instance.
 func (ts *Templates) MergeInto(tmpl *template.Template) (out *template.Template, err error) {
-	out = tmpl
+	if out, err = tmpl.Clone(); err != nil {
+		return
+	}
 	for _, t := range ts.root.Templates() {
 		if t.Name() != TEMP_TEMPLATE_NAME {
 			out, err = out.AddParseTree(t.Name(), t.Tree)
